@@ -7,7 +7,7 @@ export default {
     bodyAttrs: {
       id: 'page-top'
     },
-    title: process.env.npm_package_name || '',
+    title: 'KAM Frontend Technical Test',
     meta: [
       { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
