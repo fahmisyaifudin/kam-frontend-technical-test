@@ -96,7 +96,9 @@
                             "Success!",
                             res.data.msg,
                             "success"
-                        );
+                        ).then(() => {
+                             this.$router.push('/list-order')
+                        });
                     }
                 })
             }
