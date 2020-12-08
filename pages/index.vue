@@ -58,6 +58,7 @@
               <div class="card-header py-3">
                   <h6 class="m-0 font-weight-bold">Top Products</h6>
               </div>
+              <canvas id="topProductChart" width="200" height="100"></canvas>
               <div class="card-body">
                   <h4 class="small font-weight-bold text-primary">Products <span
                           class="float-right text-primary">Total Sold</span></h4>
@@ -75,6 +76,7 @@
               <div class="card-header py-3">
                   <h6 class="m-0 font-weight-bold">Worst Products</h6>
               </div>
+              <canvas id="worstProductChart" width="200" height="100"></canvas>
               <div class="card-body">
                   <h4 class="small font-weight-bold text-primary">Products <span
                           class="float-right text-primary">Total Sold</span></h4>
@@ -90,7 +92,9 @@
 </template>
 
 <script>
-    
+
+    import 'chart.js/dist/Chart.bundle.min.js';
+    import 'chart.js/dist/Chart.min.css';
     const qs = require('querystring')
 
     export default {
@@ -101,11 +105,63 @@
               topProducts: [],
               worstProducts: [],
               topCustomers: [],
-              years: [2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010]
+              years: [2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010],
+              topProductChart: null,
+              worstProductChart: null
            }
         },
         created() {
             this.getDashboard(this.region, this.year)
+        },
+        mounted(){
+            var ctxTop = document.getElementById('topProductChart');
+            var ctxWorst = document.getElementById('worstProductChart');
+            let data = {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Total Sold',
+                        data: [],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)',
+                            'rgba(255, 206, 86, 0.2)',
+                            'rgba(75, 192, 192, 0.2)',
+                            'rgba(153, 102, 255, 0.2)',
+                            'rgba(255, 159, 64, 0.2)',
+                            'rgba(28, 21, 214, 0.2)',
+                            'rgba(7, 122, 61, 0.2)',
+                            'rgba(138, 138, 138, 0.2)',
+                            'rgba(245, 59, 111, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)',
+                            'rgba(28, 21, 214, 1)',
+                            'rgba(7, 122, 61, 1)',
+                            'rgba(138, 138, 138, 1)',
+                            'rgba(245, 59, 111, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true
+                            }
+                        }]
+                    }
+                }
+            }
+            this.topProductChart = new Chart(ctxTop, data);
+            this.worstProductChart = new Chart(ctxWorst, data);
         },
         methods: {
             filter(){
@@ -120,6 +176,14 @@
                 year
               })).then(res => {
                 this.topProducts = res.data.data
+                let key = [], value = [];
+                res.data.data.forEach((element, index) => {
+                    key.push(index + 1);
+                    value.push(element.total_sold);
+                });
+                this.topProductChart.data.labels = key;
+                this.topProductChart.data.datasets[0].data = value;
+                this.topProductChart.update();
               })
 
               this.$axios.post("/order/worst_10_product", qs.stringify({
@@ -127,6 +191,14 @@
                 year
               })).then(res => {
                 this.worstProducts = res.data.data
+                let key = [], value = [];
+                res.data.data.forEach((element, index) => {
+                    key.push(index + 1);
+                    value.push(element.total_sold);
+                });
+                this.worstProductChart.data.labels = key;
+                this.worstProductChart.data.datasets[0].data = value;
+                this.worstProductChart.update();
               })
 
               this.$axios.post("/order/customer_ot_year", qs.stringify({
